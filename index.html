@@ -291,75 +291,49 @@
     </div>
 
     <script>
-        // Class schedule data
-        const classData = {
-            '2026-02-16': [
-                { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
-                { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
-                { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
-                { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
-            ],
-            '2026-02-17': [
-                { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
-                { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
-                { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
-                { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
-            ],
-            '2026-02-18': [
-                { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
-                { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
-                { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
-                { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
-            ],
-            '2026-02-19': [
-                { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
-                { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
-                { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
-                { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
-            ],
-            '2026-02-20': [
-                { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
-                { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
-                { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
-                { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
-            ],
-            '2026-02-21': [
-                { name: 'Saturday Classes', time: '09:00 - 13:00', type: 'class5' }
-            ],
-            '2026-02-23': [
-                { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
-                { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
-                { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
-                { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
-            ],
-            '2026-02-24': [
-                { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
-                { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
-                { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
-                { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
-            ],
-            '2026-02-25': [
-                { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
-                { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
-                { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
-                { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
-            ],
-            '2026-02-26': [
-                { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
-                { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
-                { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
-                { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
-            ],
-            '2026-02-27': [
-                { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
-                { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
-                { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
-                { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
-            ],
-            '2026-02-28': [
-                { name: 'Saturday Classes', time: '09:00 - 13:00',type: 'class5' }
-            ]
-        };
+         // --- REPEATING SCHEDULE (works for every month) ---
+  const classTemplate = {
+    class1day: [
+      { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
+      { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
+      { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
+      { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
+    ],
+    class5day: [
+      { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
+      { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
+      { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
+      { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
+    ],
+    saturday: [
+      { name: 'Saturday Classes', time: '09:00 - 13:00', type: 'class5' }
+    ]
+  };
+
+  // Optional: add holidays / no-class dates here
+  const noClassDates = new Set([
+    // '2026-03-21', // example
+  ]);
+
+  // Returns classes for a given date string (YYYY-MM-DD)
+  function getClassesForDate(dateStr) {
+    if (noClassDates.has(dateStr)) return [];
+
+    const date = new Date(dateStr + 'T00:00:00');
+    const day = date.getDay(); // 0=Sun,1=Mon,...6=Sat
+
+    // Sun
+    if (day === 0) return [];
+
+    // Sat
+    if (day === 6) return classTemplate.saturday;
+
+    // Mon/Wed/Fri -> Class 5-8
+    if (day === 1 || day === 3 || day === 5) return classTemplate.class5day;
+
+    // Tue/Thu -> Class 1-4
+    return classTemplate.class1day;
+  };
 
         let currentMonth = 1; // February
         let currentYear = 2026;
