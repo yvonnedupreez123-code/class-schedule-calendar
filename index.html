@@ -134,7 +134,6 @@
     .class-event.class1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     .class-event.class5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
 
-    /* Holiday / closed day styling */
     .class-event.holiday {
       background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
       color: #333;
@@ -293,14 +292,14 @@
       '2026-12-23': "NCC Closed Annual Holliday",
       '2026-12-24': "NCC Closed Annual Holliday",
       '2026-12-25': "Christmas Day",
-      '2026-12-26': "Day of Goodwill"
+      '2026-12-26': "Day of Goodwill",               /* ✅ FIX: comma was missing here */
       '2026-12-27': "NCC Closed Annual Holliday",
       '2026-12-28': "NCC Closed Annual Holliday",
       '2026-12-29': "NCC Closed Annual Holliday",
       '2026-12-30': "NCC Closed Annual Holliday",
       '2026-12-31': "NCC Closed Annual Holliday",
       '2027-01-01': "New Year's Day",
-      '2027-01-02': "NCC Closed Annual Holliday",
+      '2027-01-02': "NCC Closed Annual Holliday"
     };
 
     // No classes on these dates
@@ -309,9 +308,6 @@
     /*************************
      * WEEK ROTATION (A/B)   *
      *************************/
-    // Anchor week: 16 Feb 2026 is "Week A"
-    const rotationAnchor = '2026-02-16';
-
     function getMonday(d) {
       const date = new Date(d);
       const day = date.getDay(); // 0=Sun..6=Sat
@@ -328,8 +324,28 @@
       return Math.round((targetDate - anchorDate) / msPerWeek);
     }
 
+    /**
+     * Rotation rules:
+     * - From 16 Feb 2026: Week A = Mon/Wed/Fri are Class 5
+     * - From 04 Jan 2027: RESET so that Mon 04 Jan 2027 starts with Class 1 on Mon/Wed/Fri
+     */
+    const rotationRules = [
+      { start: '2026-02-16', week0MWF: 'class5' }, // Week 0 M/W/F uses Class 5
+      { start: '2027-01-04', week0MWF: 'class1' }  // RESET: Week 0 M/W/F uses Class 1
+    ];
+
+    function getActiveRotationRule(dateStr) {
+      // Choose the last rule whose start <= dateStr
+      let active = rotationRules[0];
+      for (const rule of rotationRules) {
+        if (dateStr >= rule.start) active = rule;
+      }
+      return active;
+    }
+
     function getWeekLabel(dateStr) {
-      const weekOffset = weeksBetween(rotationAnchor, dateStr);
+      const rule = getActiveRotationRule(dateStr);
+      const weekOffset = weeksBetween(rule.start, dateStr);
       const isWeekA = (weekOffset % 2 === 0);
       return isWeekA ? 'Week A' : 'Week B';
     }
@@ -350,16 +366,24 @@
       // Sat: Saturday classes (no rotation)
       if (day === 6) return classTemplate.saturday;
 
-      const weekOffset = weeksBetween(rotationAnchor, dateStr);
-      const isWeekA = (weekOffset % 2 === 0);
       const isMonWedFri = (day === 1 || day === 3 || day === 5);
 
-      // Week A:  Mon/Wed/Fri = Class 5, Tue/Thu = Class 1
-      // Week B:  Mon/Wed/Fri = Class 1, Tue/Thu = Class 5
-      if (isWeekA) {
-        return isMonWedFri ? classTemplate.class5day : classTemplate.class1day;
+      // Use the active rotation rule (handles the 2027 reset)
+      const rule = getActiveRotationRule(dateStr);
+      const weekOffset = weeksBetween(rule.start, dateStr);
+      const isEvenWeek = (weekOffset % 2 === 0);
+
+      // Determine which class set runs on M/W/F this week
+      // Even week => week0MWF, Odd week => the opposite
+      let mwfClass = rule.week0MWF; // 'class1' or 'class5'
+      if (!isEvenWeek) mwfClass = (mwfClass === 'class1') ? 'class5' : 'class1';
+
+      const tueThuClass = (mwfClass === 'class1') ? 'class5' : 'class1';
+
+      if (isMonWedFri) {
+        return (mwfClass === 'class1') ? classTemplate.class1day : classTemplate.class5day;
       } else {
-        return isMonWedFri ? classTemplate.class1day : classTemplate.class5day;
+        return (tueThuClass === 'class1') ? classTemplate.class1day : classTemplate.class5day;
       }
     }
 
@@ -386,7 +410,7 @@
 
       calendarGrid.innerHTML = '';
 
-      // Set week badge based on the first day of the month (Monday of that week)
+      // Badge based on the first day of the month
       const firstDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
       weekBadge.textContent = getWeekLabel(firstDateStr);
 
@@ -430,7 +454,7 @@
       dayNumber.textContent = day;
       dayBox.appendChild(dayNumber);
 
-      // Add class blocks
+      // Add class blocks + holiday labels
       if (dateStr) {
         const classes = getClassesForDate(dateStr);
         classes.forEach(cls => {
@@ -441,7 +465,6 @@
           dayBox.appendChild(classEvent);
         });
 
-        // Add holiday/special-day label
         if (publicHolidays[dateStr]) {
           const holidayTag = document.createElement('div');
           holidayTag.className = 'class-event holiday';
@@ -515,8 +538,8 @@
       let nextClass = null;
       let nextClassDate = null;
 
-      // Look ahead up to 90 days for the next class
-      for (let i = 0; i <= 90; i++) {
+      // Look ahead up to 180 days
+      for (let i = 0; i <= 180; i++) {
         const d = new Date(now);
         d.setDate(now.getDate() + i);
         const dateStr = d.toISOString().split('T')[0];
