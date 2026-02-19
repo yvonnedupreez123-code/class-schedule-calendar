@@ -44,6 +44,8 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .calendar-header button {
@@ -61,6 +63,17 @@
     .calendar-header button:hover { background: #1976D2; }
 
     .month-year { font-size: 24px; font-weight: bold; color: #333; }
+
+    .week-badge {
+      display: inline-block;
+      background: #f0f7ff;
+      border: 1px solid #cfe3ff;
+      color: #1f5aa6;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
 
     .weekdays {
       display: grid;
@@ -175,6 +188,7 @@
       .day-number { font-size: 14px; }
       .class-event { font-size: 10px; }
       .weekday { font-size: 12px; }
+      .month-year { font-size: 20px; }
     }
 
     @media (max-width: 480px) {
@@ -207,7 +221,12 @@
     <div class="calendar-container">
       <div class="calendar-header">
         <button onclick="previousMonth()">← Previous</button>
-        <div class="month-year" id="monthYear"></div>
+
+        <div style="text-align:center; flex: 1;">
+          <div class="month-year" id="monthYear"></div>
+          <div class="week-badge" id="weekBadge">Week A</div>
+        </div>
+
         <button onclick="nextMonth()">Next →</button>
       </div>
 
@@ -227,7 +246,7 @@
 
   <script>
     /**********************
-     * REPEATING SCHEDULE *
+     * CLASS TEMPLATES    *
      **********************/
     const classTemplate = {
       class1day: [
@@ -248,7 +267,7 @@
     };
 
     /*************************
-     * SA HOLIDAYS / SPECIAL *
+     * HOLIDAYS / SPECIAL    *
      *************************/
     const publicHolidays = {
       '2026-01-01': "New Year's Day",
@@ -264,42 +283,83 @@
       '2026-08-09': "National Women's Day",
       '2026-08-10': "Women's Day (Observed)",
       '2026-09-24': "Heritage Day",
+      '2026-12-15': "NCC Closing for Annual Holliday",
       '2026-12-16': "Day of Reconciliation",
       '2026-12-25': "Christmas Day",
       '2026-12-26': "Day of Goodwill"
+      '2027-01-04': "NCC Open for Class",
     };
 
-    // Dates where there are NO classes (holidays, closures, graduations, etc.)
+    // No classes on these dates
     const noClassDates = new Set(Object.keys(publicHolidays));
 
-    /**
-     * Returns array of classes for a given date string (YYYY-MM-DD)
-     */
+    /*************************
+     * WEEK ROTATION (A/B)   *
+     *************************/
+    // Anchor week: 16 Feb 2026 is "Week A"
+    const rotationAnchor = '2026-02-16';
+
+    function getMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay(); // 0=Sun..6=Sat
+      const diff = (day === 0 ? -6 : 1) - day; // shift to Monday
+      date.setDate(date.getDate() + diff);
+      date.setHours(0, 0, 0, 0);
+      return date;
+    }
+
+    function weeksBetween(anchorStr, dateStr) {
+      const anchorDate = getMonday(new Date(anchorStr + 'T00:00:00'));
+      const targetDate = getMonday(new Date(dateStr + 'T00:00:00'));
+      const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+      return Math.round((targetDate - anchorDate) / msPerWeek);
+    }
+
+    function getWeekLabel(dateStr) {
+      const weekOffset = weeksBetween(rotationAnchor, dateStr);
+      const isWeekA = (weekOffset % 2 === 0);
+      return isWeekA ? 'Week A' : 'Week B';
+    }
+
+    /*************************
+     * SCHEDULE GENERATOR    *
+     *************************/
     function getClassesForDate(dateStr) {
+      // Block classes on holidays/closures
       if (noClassDates.has(dateStr)) return [];
 
       const date = new Date(dateStr + 'T00:00:00');
-      const day = date.getDay(); // 0=Sun,1=Mon,...6=Sat
+      const day = date.getDay(); // 0=Sun..6=Sat
 
-      if (day === 0) return []; // Sun
-      if (day === 6) return classTemplate.saturday; // Sat
+      // Sun: no classes
+      if (day === 0) return [];
 
-      // Mon/Wed/Fri -> Class 5-8
-      if (day === 1 || day === 3 || day === 5) return classTemplate.class5day;
+      // Sat: Saturday classes (no rotation)
+      if (day === 6) return classTemplate.saturday;
 
-      // Tue/Thu -> Class 1-4
-      return classTemplate.class1day;
+      const weekOffset = weeksBetween(rotationAnchor, dateStr);
+      const isWeekA = (weekOffset % 2 === 0);
+      const isMonWedFri = (day === 1 || day === 3 || day === 5);
+
+      // Week A:  Mon/Wed/Fri = Class 5, Tue/Thu = Class 1
+      // Week B:  Mon/Wed/Fri = Class 1, Tue/Thu = Class 5
+      if (isWeekA) {
+        return isMonWedFri ? classTemplate.class5day : classTemplate.class1day;
+      } else {
+        return isMonWedFri ? classTemplate.class1day : classTemplate.class5day;
+      }
     }
 
     /**********************
      * CALENDAR CONTROLS  *
      **********************/
-    let currentMonth = 1; // 0=Jan, 1=Feb...
+    let currentMonth = 1; // 0=Jan
     let currentYear = 2026;
 
     function renderCalendar() {
       const calendarGrid = document.getElementById('calendarGrid');
       const monthYearDisplay = document.getElementById('monthYear');
+      const weekBadge = document.getElementById('weekBadge');
 
       const monthNames = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -312,6 +372,10 @@
       const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
       calendarGrid.innerHTML = '';
+
+      // Set week badge based on the first day of the month (Monday of that week)
+      const firstDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
+      weekBadge.textContent = getWeekLabel(firstDateStr);
 
       // Previous month filler
       for (let i = firstDay - 1; i >= 0; i--) {
@@ -406,6 +470,7 @@
     function showClassDetails(dateStr) {
       const classes = getClassesForDate(dateStr);
       const holidayName = publicHolidays[dateStr];
+      const weekLabel = getWeekLabel(dateStr);
 
       if ((!classes || classes.length === 0) && !holidayName) return;
 
@@ -413,7 +478,7 @@
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const dateDisplay = date.toLocaleDateString('en-US', options);
 
-      let details = `${dateDisplay}\n\n`;
+      let details = `${dateDisplay}\n${weekLabel}\n\n`;
 
       if (holidayName) details += `🎉 ${holidayName}\n\n`;
 
@@ -474,7 +539,7 @@
         nextClassDiv.innerHTML = `
           <h3>Next Class</h3>
           <div class="class-name">${nextClass.name}</div>
-          <div class="class-details">📅 ${dateDisplay}</div>
+          <div class="class-details">📅 ${dateDisplay} (${getWeekLabel(nextClassDate)})</div>
           <div class="class-details">⏰ ${nextClass.time}</div>
         `;
       } else {
@@ -503,7 +568,7 @@
 
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          alert('✅ Notifications enabled! (Note: this page only requests permission. A full reminder system needs a notification scheduler.)');
+          alert('✅ Notifications enabled! (Note: permission only. Full reminders require a scheduler/service worker logic.)');
         }
       });
     }
