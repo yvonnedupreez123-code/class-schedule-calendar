@@ -1,549 +1,522 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="College Class Schedule & Notifications">
-    <meta name="theme-color" content="#2196F3">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%232196F3' width='192' height='192'/><text x='50%' y='50%' font-size='100' fill='white' text-anchor='middle' dy='.3em'>📚</text></svg>">
-    <title>Class Schedule Calendar</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="College Class Schedule & Notifications" />
+  <meta name="theme-color" content="#2196F3" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%232196F3' width='192' height='192'/><text x='50%' y='50%' font-size='100' fill='white' text-anchor='middle' dy='.3em'>📚</text></svg>">
+  <title>Class Schedule Calendar</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
 
-        header {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+    .container { max-width: 900px; margin: 0 auto; }
 
-        h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
+    header {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
 
-        .calendar-container {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+    h1 { color: #333; font-size: 28px; margin-bottom: 10px; }
 
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+    .calendar-container {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
 
-        .calendar-header button {
-            background: #2196F3;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
 
-        .calendar-header button:hover {
-            background: #1976D2;
-        }
+    .calendar-header button {
+      background: #2196F3;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
 
-        .month-year {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
+    .calendar-header button:hover { background: #1976D2; }
 
-        .weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
-        }
+    .month-year { font-size: 24px; font-weight: bold; color: #333; }
 
-        .weekday {
-            text-align: center;
-            font-weight: bold;
-            color: #2196F3;
-            padding: 10px 0;
-            font-size: 14px;
-        }
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+    }
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            min-height: 600px;
-        }
+    .weekday {
+      text-align: center;
+      font-weight: bold;
+      color: #2196F3;
+      padding: 10px 0;
+      font-size: 14px;
+    }
 
-        .day-box {
-            background: #f9f9f9;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 10px;
-            min-height: 120px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      min-height: 600px;
+    }
 
-        .day-box:hover {
-            background: #f0f7ff;
-            border-color: #2196F3;
-        }
+    .day-box {
+      background: #f9f9f9;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 120px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
 
-        .day-box.other-month {
-            background: #fafafa;
-            opacity: 0.5;
-        }
+    .day-box:hover { background: #f0f7ff; border-color: #2196F3; }
 
-        .day-box.today {
-            background: #e3f2fd;
-            border-color: #2196F3;
-            border-width: 3px;
-        }
+    .day-box.other-month { background: #fafafa; opacity: 0.5; cursor: default; }
 
-        .day-number {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
+    .day-box.today { background: #e3f2fd; border-color: #2196F3; border-width: 3px; }
 
-        .day-box.other-month .day-number {
-            color: #999;
-        }
+    .day-number { font-weight: bold; color: #333; margin-bottom: 8px; font-size: 16px; }
 
-        .class-event {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: 500;
-        }
+    .day-box.other-month .day-number { color: #999; }
 
-        .class-event.class1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .class-event.class5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .class-event {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+    }
 
-        .info-box {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            color: #856404;
-            text-align: center;
-        }
+    .class-event.class1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .class-event.class5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
 
-        .notification-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
-            margin-top: 10px;
-        }
+    /* Holiday / closed day styling */
+    .class-event.holiday {
+      background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+      color: #333;
+      font-weight: bold;
+    }
 
-        .notification-btn:hover {
-            background: #45a049;
-        }
+    .info-box {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #856404;
+      text-align: center;
+    }
 
-        .next-class {
-            background: #f0f7ff;
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
+    .notification-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+      margin-top: 10px;
+    }
 
-        .next-class h3 {
-            color: #2196F3;
-            margin-bottom: 10px;
-        }
+    .notification-btn:hover { background: #45a049; }
 
-        .class-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
+    .next-class {
+      background: #f0f7ff;
+      border-left: 4px solid #2196F3;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      text-align: left;
+    }
 
-        .class-details {
-            color: #666;
-            font-size: 14px;
-            margin-top: 5px;
-        }
+    .next-class h3 { color: #2196F3; margin-bottom: 10px; }
 
-        @media (max-width: 768px) {
-            .container {
-                max-width: 100%;
-            }
+    .class-name { font-size: 18px; font-weight: bold; color: #333; }
 
-            .calendar-grid {
-                min-height: 800px;
-            }
+    .class-details { color: #666; font-size: 14px; margin-top: 5px; }
 
-            .day-box {
-                min-height: 100px;
-                padding: 8px;
-            }
+    @media (max-width: 768px) {
+      .container { max-width: 100%; }
+      .calendar-grid { min-height: 800px; }
+      .day-box { min-height: 100px; padding: 8px; }
+      .day-number { font-size: 14px; }
+      .class-event { font-size: 10px; }
+      .weekday { font-size: 12px; }
+    }
 
-            .day-number {
-                font-size: 14px;
-            }
-
-            .class-event {
-                font-size: 10px;
-            }
-
-            .weekday {
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                max-width: 100%;
-            }
-
-            .calendar-grid {
-                min-height: 1000px;
-            }
-
-            .day-box {
-                min-height: 80px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-        }
-    </style>
+    @media (max-width: 480px) {
+      .container { max-width: 100%; }
+      .calendar-grid { min-height: 1000px; }
+      .day-box { min-height: 80px; }
+      h1 { font-size: 22px; }
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>📚 Class Schedule Calendar</h1>
-            <button class="notification-btn" onclick="requestNotifications()">
-                🔔 Enable Notifications
-            </button>
-            <div class="next-class" id="nextClass">
-                <h3>Next Class</h3>
-                <p style="color: #666;">Loading...</p>
-            </div>
-        </header>
+  <div class="container">
+    <header>
+      <h1>📚 Class Schedule Calendar</h1>
+      <button class="notification-btn" onclick="requestNotifications()">
+        🔔 Enable Notifications
+      </button>
 
-        <div class="info-box">
-            ℹ️ Click on any date to see class details. Install this app to your home screen!
-        </div>
+      <div class="next-class" id="nextClass">
+        <h3>Next Class</h3>
+        <p style="color:#666;">Loading...</p>
+      </div>
+    </header>
 
-        <div class="calendar-container">
-            <div class="calendar-header">
-                <button onclick="previousMonth()">← Previous</button>
-                <div class="month-year" id="monthYear"></div>
-                <button onclick="nextMonth()">Next →</button>
-            </div>
-
-            <div class="weekdays">
-                <div class="weekday">Sun</div>
-                <div class="weekday">Mon</div>
-                <div class="weekday">Tue</div>
-                <div class="weekday">Wed</div>
-                <div class="weekday">Thu</div>
-                <div class="weekday">Fri</div>
-                <div class="weekday">Sat</div>
-            </div>
-
-            <div class="calendar-grid" id="calendarGrid"></div>
-        </div>
+    <div class="info-box">
+      ℹ️ Click on any date to see class details. Ask your instructor if you are not sure in which class you are scheduled.
     </div>
 
-    <script>
-         // --- REPEATING SCHEDULE (works for every month) ---
-  const classTemplate = {
-    class1day: [
-      { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
-      { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
-      { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
-      { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
-    ],
-    class5day: [
-      { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
-      { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
-      { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
-      { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
-    ],
-    saturday: [
-      { name: 'Saturday Classes', time: '09:00 - 13:00', type: 'class5' }
-    ]
-  };
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <button onclick="previousMonth()">← Previous</button>
+        <div class="month-year" id="monthYear"></div>
+        <button onclick="nextMonth()">Next →</button>
+      </div>
 
-  // Optional: add holidays / no-class dates here
-  const noClassDates = new Set([
-    // '2026-03-21', // example
-  ]);
+      <div class="weekdays">
+        <div class="weekday">Sun</div>
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+      </div>
 
-  // Returns classes for a given date string (YYYY-MM-DD)
-  function getClassesForDate(dateStr) {
-    if (noClassDates.has(dateStr)) return [];
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+  </div>
 
-    const date = new Date(dateStr + 'T00:00:00');
-    const day = date.getDay(); // 0=Sun,1=Mon,...6=Sat
+  <script>
+    /**********************
+     * REPEATING SCHEDULE *
+     **********************/
+    const classTemplate = {
+      class1day: [
+        { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
+        { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
+        { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
+        { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
+      ],
+      class5day: [
+        { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
+        { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
+        { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
+        { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
+      ],
+      saturday: [
+        { name: 'Saturday Classes', time: '09:00 - 13:00', type: 'class5' }
+      ]
+    };
 
-    // Sun
-    if (day === 0) return [];
+    /*************************
+     * SA HOLIDAYS / SPECIAL *
+     *************************/
+    const publicHolidays = {
+      '2026-01-01': "New Year's Day",
+      '2026-03-21': "Human Rights Day",
+      '2026-04-03': "Good Friday",
+      '2026-04-04': "NCC Closed",
+      '2026-04-06': "Family Day",
+      '2026-04-27': "Freedom Day",
+      '2026-05-01': "Workers' Day",
+      '2026-05-30': "NCC Graduation Day",
+      '2026-06-16': "Youth Day",
+      '2026-07-04': "NCC Graduation Day",
+      '2026-08-09': "National Women's Day",
+      '2026-08-10': "Women's Day (Observed)",
+      '2026-09-24': "Heritage Day",
+      '2026-12-16': "Day of Reconciliation",
+      '2026-12-25': "Christmas Day",
+      '2026-12-26': "Day of Goodwill"
+    };
 
-    // Sat
-    if (day === 6) return classTemplate.saturday;
+    // Dates where there are NO classes (holidays, closures, graduations, etc.)
+    const noClassDates = new Set(Object.keys(publicHolidays));
 
-    // Mon/Wed/Fri -> Class 5-8
-    if (day === 1 || day === 3 || day === 5) return classTemplate.class5day;
+    /**
+     * Returns array of classes for a given date string (YYYY-MM-DD)
+     */
+    function getClassesForDate(dateStr) {
+      if (noClassDates.has(dateStr)) return [];
 
-    // Tue/Thu -> Class 1-4
-    return classTemplate.class1day;
-  };
+      const date = new Date(dateStr + 'T00:00:00');
+      const day = date.getDay(); // 0=Sun,1=Mon,...6=Sat
 
-        let currentMonth = 1; // February
-        let currentYear = 2026;
+      if (day === 0) return []; // Sun
+      if (day === 6) return classTemplate.saturday; // Sat
 
-        function renderCalendar() {
-            const calendarGrid = document.getElementById('calendarGrid');
-            const monthYearDisplay = document.getElementById('monthYear');
-            
-            // Display month and year
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'];
-            monthYearDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+      // Mon/Wed/Fri -> Class 5-8
+      if (day === 1 || day === 3 || day === 5) return classTemplate.class5day;
 
-            // Get first day of month and number of days
-            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+      // Tue/Thu -> Class 1-4
+      return classTemplate.class1day;
+    }
 
-            calendarGrid.innerHTML = '';
+    /**********************
+     * CALENDAR CONTROLS  *
+     **********************/
+    let currentMonth = 1; // 0=Jan, 1=Feb...
+    let currentYear = 2026;
 
-            // Previous month's days
-            for (let i = firstDay - 1; i >= 0; i--) {
-                const dayBox = createDayBox(daysInPrevMonth - i, true);
-                calendarGrid.appendChild(dayBox);
-            }
+    function renderCalendar() {
+      const calendarGrid = document.getElementById('calendarGrid');
+      const monthYearDisplay = document.getElementById('monthYear');
 
-            // Current month's days
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayBox = createDayBox(day, false, dateStr);
-                calendarGrid.appendChild(dayBox);
-            }
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      monthYearDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
-            // Next month's days
-            const totalCells = calendarGrid.children.length;
-            const remainingCells = 42 - totalCells; // 6 rows × 7 days
-            for (let day = 1; day <= remainingCells; day++) {
-                const dayBox = createDayBox(day, true);
-                calendarGrid.appendChild(dayBox);
-            }
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
-            updateNextClass();
+      calendarGrid.innerHTML = '';
+
+      // Previous month filler
+      for (let i = firstDay - 1; i >= 0; i--) {
+        calendarGrid.appendChild(createDayBox(daysInPrevMonth - i, true));
+      }
+
+      // Current month
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        calendarGrid.appendChild(createDayBox(day, false, dateStr));
+      }
+
+      // Next month filler up to 42 cells
+      const remainingCells = 42 - calendarGrid.children.length;
+      for (let day = 1; day <= remainingCells; day++) {
+        calendarGrid.appendChild(createDayBox(day, true));
+      }
+
+      updateNextClass();
+    }
+
+    function createDayBox(day, isOtherMonth, dateStr = null) {
+      const dayBox = document.createElement('div');
+      dayBox.className = 'day-box';
+
+      if (isOtherMonth) {
+        dayBox.classList.add('other-month');
+      }
+
+      // Today highlight
+      const today = new Date();
+      if (!isOtherMonth && dateStr) {
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        if (dateStr === todayStr) dayBox.classList.add('today');
+      }
+
+      const dayNumber = document.createElement('div');
+      dayNumber.className = 'day-number';
+      dayNumber.textContent = day;
+      dayBox.appendChild(dayNumber);
+
+      // Add class blocks
+      if (dateStr) {
+        const classes = getClassesForDate(dateStr);
+        classes.forEach(cls => {
+          const classEvent = document.createElement('div');
+          classEvent.className = `class-event ${cls.type}`;
+          classEvent.textContent = cls.name;
+          classEvent.title = `${cls.name}\n${cls.time}`;
+          dayBox.appendChild(classEvent);
+        });
+
+        // Add holiday/special-day label
+        if (publicHolidays[dateStr]) {
+          const holidayTag = document.createElement('div');
+          holidayTag.className = 'class-event holiday';
+          holidayTag.textContent = '🎉 ' + publicHolidays[dateStr];
+          holidayTag.title = publicHolidays[dateStr];
+          dayBox.appendChild(holidayTag);
         }
+      }
 
-        function createDayBox(day, isOtherMonth, dateStr = null) {
-            const dayBox = document.createElement('div');
-            dayBox.className = 'day-box';
-            
-            if (isOtherMonth) {
-                dayBox.classList.add('other-month');
+      // Click details (only for current month cells)
+      if (!isOtherMonth && dateStr) {
+        dayBox.onclick = () => showClassDetails(dateStr);
+        dayBox.style.cursor = 'pointer';
+      } else {
+        dayBox.style.cursor = 'default';
+      }
+
+      return dayBox;
+    }
+
+    function previousMonth() {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+
+    function showClassDetails(dateStr) {
+      const classes = getClassesForDate(dateStr);
+      const holidayName = publicHolidays[dateStr];
+
+      if ((!classes || classes.length === 0) && !holidayName) return;
+
+      const date = new Date(dateStr + 'T00:00:00');
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateDisplay = date.toLocaleDateString('en-US', options);
+
+      let details = `${dateDisplay}\n\n`;
+
+      if (holidayName) details += `🎉 ${holidayName}\n\n`;
+
+      if (classes && classes.length > 0) {
+        classes.forEach(cls => {
+          details += `${cls.name}\n⏰ ${cls.time}\n\n`;
+        });
+      } else if (holidayName) {
+        details += `No classes scheduled.\n\n`;
+      }
+
+      alert(details);
+    }
+
+    function updateNextClass() {
+      const now = new Date();
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const currentTotalMinutes = currentHours * 60 + currentMinutes;
+
+      let nextClass = null;
+      let nextClassDate = null;
+
+      // Look ahead up to 90 days for the next class
+      for (let i = 0; i <= 90; i++) {
+        const d = new Date(now);
+        d.setDate(now.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        const classes = getClassesForDate(dateStr);
+
+        for (const cls of classes) {
+          const [startTime] = cls.time.split(' - ');
+          const [startHour, startMin] = startTime.split(':').map(Number);
+          const classStartMinutes = startHour * 60 + startMin;
+
+          if (i === 0) {
+            if (classStartMinutes > currentTotalMinutes) {
+              nextClass = cls;
+              nextClassDate = dateStr;
+              break;
             }
-
-            // Check if it's today
-            const today = new Date();
-            if (!isOtherMonth && dateStr) {
-                const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                if (dateStr === todayStr) {
-                    dayBox.classList.add('today');
-                }
-            }
-
-            const dayNumber = document.createElement('div');
-            dayNumber.className = 'day-number';
-            dayNumber.textContent = day;
-            dayBox.appendChild(dayNumber);
-
-            // Add classes if this date has any
-            if (dateStr && classData[dateStr]) {
-                classData[dateStr].forEach(cls => {
-                    const classEvent = document.createElement('div');
-                    classEvent.className = `class-event ${cls.type}`;
-                    classEvent.textContent = cls.name;
-                    classEvent.title = `${cls.name}\n${cls.time}`;
-                    dayBox.appendChild(classEvent);
-                });
-            }
-
-            // Add click event
-            if (!isOtherMonth && dateStr) {
-                dayBox.onclick = () => showClassDetails(dateStr);
-                dayBox.style.cursor = 'pointer';
-            }
-
-            return dayBox;
+          } else {
+            nextClass = cls;
+            nextClassDate = dateStr;
+            break;
+          }
         }
+        if (nextClass) break;
+      }
 
-        function previousMonth() {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar();
+      const nextClassDiv = document.getElementById('nextClass');
+
+      if (nextClass) {
+        const date = new Date(nextClassDate + 'T00:00:00');
+        const options = { weekday: 'long', month: 'short', day: 'numeric' };
+        const dateDisplay = date.toLocaleDateString('en-US', options);
+
+        nextClassDiv.innerHTML = `
+          <h3>Next Class</h3>
+          <div class="class-name">${nextClass.name}</div>
+          <div class="class-details">📅 ${dateDisplay}</div>
+          <div class="class-details">⏰ ${nextClass.time}</div>
+        `;
+      } else {
+        nextClassDiv.innerHTML = `
+          <h3>Next Class</h3>
+          <p style="color:#666;">No upcoming classes scheduled</p>
+        `;
+      }
+    }
+
+    function requestNotifications() {
+      if (!('Notification' in window)) {
+        alert('Your browser does not support notifications');
+        return;
+      }
+
+      if (Notification.permission === 'granted') {
+        alert('✅ Notifications already enabled!');
+        return;
+      }
+
+      if (Notification.permission === 'denied') {
+        alert('⚠️ Notifications are blocked. Please enable them in your browser settings.');
+        return;
+      }
+
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          alert('✅ Notifications enabled! (Note: this page only requests permission. A full reminder system needs a notification scheduler.)');
         }
+      });
+    }
 
-        function nextMonth() {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar();
-        }
+    // Register Service Worker (optional)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker registered'))
+        .catch(err => console.log('Service Worker registration failed:', err));
+    }
 
-        function showClassDetails(dateStr) {
-            const classes = classData[dateStr];
-            if (!classes || classes.length === 0) return;
-
-            const date = new Date(dateStr + 'T00:00:00');
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateDisplay = date.toLocaleDateString('en-US', options);
-
-            let details = `${dateDisplay}\n\n`;
-            classes.forEach(cls => {
-                details += `${cls.name}\n⏰ ${cls.time}\n\n`;
-            });
-
-            alert(details);
-        }
-
-        function updateNextClass() {
-            const now = new Date();
-            const currentDateStr = now.toISOString().split('T')[0];
-            const currentHours = now.getHours();
-            const currentMinutes = now.getMinutes();
-            const currentTotalMinutes = currentHours * 60 + currentMinutes;
-
-            let nextClass = null;
-            let nextClassDate = null;
-
-            // Check all dates in classData
-            for (const [dateStr, classes] of Object.entries(classData)) {
-                const classDate = new Date(dateStr + 'T00:00:00');
-                
-                for (const cls of classes) {
-                    const [startTime] = cls.time.split(' - ');
-                    const [startHour, startMin] = startTime.split(':').map(Number);
-                    const classStartMinutes = startHour * 60 + startMin;
-
-                    // If it's today and the class hasn't started yet
-                    if (dateStr === currentDateStr && classStartMinutes > currentTotalMinutes) {
-                        nextClass = cls;
-                        nextClassDate = dateStr;
-                        break;
-                    }
-                    // If it's in the future
-                    else if (dateStr > currentDateStr) {
-                        nextClass = cls;
-                        nextClassDate = dateStr;
-                        break;
-                    }
-                }
-
-                if (nextClass) break;
-            }
-
-            const nextClassDiv = document.getElementById('nextClass');
-            if (nextClass) {
-                const date = new Date(nextClassDate + 'T00:00:00');
-                const options = { weekday: 'long', month: 'short', day: 'numeric' };
-                const dateDisplay = date.toLocaleDateString('en-US', options);
-
-                nextClassDiv.innerHTML = `
-                    <h3>Next Class</h3>
-                    <div class="class-name">${nextClass.name}</div>
-                    <div class="class-details">📅 ${dateDisplay}</div>
-                    <div class="class-details">⏰ ${nextClass.time}</div>
-                  `;
-            } else {
-                nextClassDiv.innerHTML = `
-                    <h3>Next Class</h3>
-                    <p style="color: #666;">No upcoming classes scheduled</p>
-                `;
-            }
-        }
-
-        function requestNotifications() {
-            if (!('Notification' in window)) {
-                alert('Your browser does not support notifications');
-                return;
-            }
-
-            if (Notification.permission === 'granted') {
-                alert('✅ Notifications already enabled!');
-                return;
-            }
-
-            if (Notification.permission === 'denied') {
-                alert('⚠️ Notifications are blocked. Please enable them in your browser settings.');
-                return;
-            }
-
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    alert('✅ Notifications enabled! You will receive class reminders 15 minutes before each class.');
-                }
-            });
-        }
-
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(reg => {
-                console.log('Service Worker registered');
-            }).catch(err => {
-                console.log('Service Worker registration failed:', err);
-            });
-        }
-
-        // Initialize
-        renderCalendar();
-    </script>
+    // Initialize
+    renderCalendar();
+  </script>
 </body>
 </html>
