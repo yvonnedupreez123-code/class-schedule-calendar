@@ -64,17 +64,6 @@
 
     .month-year { font-size: 24px; font-weight: bold; color: #333; }
 
-    .week-badge {
-      display: inline-block;
-      background: #f0f7ff;
-      border: 1px solid #cfe3ff;
-      color: #1f5aa6;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
     .weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -92,7 +81,7 @@
 
     .calendar-grid {
       display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr)); /* ✅ prevents overflow merging */
+      grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 10px;
       min-height: 600px;
     }
@@ -106,16 +95,20 @@
       cursor: pointer;
       transition: all 0.3s;
       position: relative;
-
-      min-width: 0;       /* ✅ FIX: stop grid items overflowing into next column */
-      overflow: hidden;   /* ✅ FIX: prevents the “Fri/Sat merged” look */
+      min-width: 0;
+      overflow: hidden;
     }
 
     .day-box:hover { background: #f0f7ff; border-color: #2196F3; }
 
     .day-box.other-month { background: #fafafa; opacity: 0.5; cursor: default; }
 
-    .day-box.today { background: #e3f2fd; border-color: #2196F3; border-width: 3px; }
+    .day-box.today {
+      background: #e3f2fd;
+      border-color: #2196F3;
+      border-width: 3px;
+      box-shadow: 0 0 0 2px rgba(33,150,243,0.12);
+    }
 
     .day-number { font-weight: bold; color: #333; margin-bottom: 8px; font-size: 16px; }
 
@@ -132,14 +125,12 @@
       overflow: hidden;
       text-overflow: ellipsis;
       font-weight: 500;
-
-      min-width: 0; /* ✅ extra safety */
+      min-width: 0;
     }
 
     .class-event.class1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     .class-event.class5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
 
-    /* Holiday / closed day styling */
     .class-event.holiday {
       background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
       color: #333;
@@ -229,7 +220,6 @@
 
         <div style="text-align:center; flex: 1;">
           <div class="month-year" id="monthYear"></div>
-          <div class="week-badge" id="weekBadge">Week A</div>
         </div>
 
         <button onclick="nextMonth()">Next →</button>
@@ -310,16 +300,15 @@
       '2027-01-02': "NCC Closed Annual Holiday"
     };
 
-    // No classes on these dates
     const noClassDates = new Set(Object.keys(publicHolidays));
 
     /*************************
-     * WEEK ROTATION (A/B)   *
+     * WEEK ROTATION RULES   *
      *************************/
     function getMonday(d) {
       const date = new Date(d);
-      const day = date.getDay(); // 0=Sun..6=Sat
-      const diff = (day === 0 ? -6 : 1) - day; // shift to Monday
+      const day = date.getDay();
+      const diff = (day === 0 ? -6 : 1) - day;
       date.setDate(date.getDate() + diff);
       date.setHours(0, 0, 0, 0);
       return date;
@@ -332,11 +321,6 @@
       return Math.round((targetDate - anchorDate) / msPerWeek);
     }
 
-    /**
-     * Rotation rules:
-     * - From 16 Feb 2026: Week "even" = Mon/Wed/Fri are Class 5
-     * - From 04 Jan 2027: RESET so that Mon 04 Jan 2027 starts with Class 1 on Mon/Wed/Fri
-     */
     const rotationRules = [
       { start: '2026-02-16', week0MWF: 'class5' },
       { start: '2027-01-04', week0MWF: 'class1' }
@@ -350,13 +334,6 @@
       return active;
     }
 
-    function getWeekLabel(dateStr) {
-      const rule = getActiveRotationRule(dateStr);
-      const weekOffset = weeksBetween(rule.start, dateStr);
-      const isWeekA = (weekOffset % 2 === 0);
-      return isWeekA ? 'Week A' : 'Week B';
-    }
-
     /*************************
      * SCHEDULE GENERATOR    *
      *************************/
@@ -364,10 +341,10 @@
       if (noClassDates.has(dateStr)) return [];
 
       const date = new Date(dateStr + 'T00:00:00');
-      const day = date.getDay(); // 0=Sun..6=Sat
+      const day = date.getDay();
 
-      if (day === 0) return [];               // Sun
-      if (day === 6) return classTemplate.saturday; // Sat
+      if (day === 0) return [];
+      if (day === 6) return classTemplate.saturday;
 
       const isMonWedFri = (day === 1 || day === 3 || day === 5);
 
@@ -375,8 +352,7 @@
       const weekOffset = weeksBetween(rule.start, dateStr);
       const isEvenWeek = (weekOffset % 2 === 0);
 
-      // Even week => week0MWF, odd week => opposite
-      let mwfClass = rule.week0MWF; // 'class1' or 'class5'
+      let mwfClass = rule.week0MWF;
       if (!isEvenWeek) mwfClass = (mwfClass === 'class1') ? 'class5' : 'class1';
 
       const tueThuClass = (mwfClass === 'class1') ? 'class5' : 'class1';
@@ -391,13 +367,13 @@
     /**********************
      * CALENDAR CONTROLS  *
      **********************/
-    let currentMonth = 1; // 0=Jan
-    let currentYear = 2026;
+    const today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
 
     function renderCalendar() {
       const calendarGrid = document.getElementById('calendarGrid');
       const monthYearDisplay = document.getElementById('monthYear');
-      const weekBadge = document.getElementById('weekBadge');
 
       const monthNames = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -410,9 +386,6 @@
       const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
       calendarGrid.innerHTML = '';
-
-      const firstDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-01`;
-      weekBadge.textContent = getWeekLabel(firstDateStr);
 
       for (let i = firstDay - 1; i >= 0; i--) {
         calendarGrid.appendChild(createDayBox(daysInPrevMonth - i, true));
@@ -437,9 +410,9 @@
 
       if (isOtherMonth) dayBox.classList.add('other-month');
 
-      const today = new Date();
       if (!isOtherMonth && dateStr) {
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         if (dateStr === todayStr) dayBox.classList.add('today');
       }
 
@@ -498,7 +471,6 @@
     function showClassDetails(dateStr) {
       const classes = getClassesForDate(dateStr);
       const holidayName = publicHolidays[dateStr];
-      const weekLabel = getWeekLabel(dateStr);
 
       if ((!classes || classes.length === 0) && !holidayName) return;
 
@@ -506,7 +478,7 @@
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const dateDisplay = date.toLocaleDateString('en-US', options);
 
-      let details = `${dateDisplay}\n${weekLabel}\n\n`;
+      let details = `${dateDisplay}\n\n`;
 
       if (holidayName) details += `🎉 ${holidayName}\n\n`;
 
@@ -563,7 +535,7 @@
         nextClassDiv.innerHTML = `
           <h3>Next Class</h3>
           <div class="class-name">${nextClass.name}</div>
-          <div class="class-details">📅 ${dateDisplay} (${getWeekLabel(nextClassDate)})</div>
+          <div class="class-details">📅 ${dateDisplay}</div>
           <div class="class-details">⏰ ${nextClass.time}</div>
         `;
       } else {
