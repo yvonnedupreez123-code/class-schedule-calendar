@@ -3,36 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="College Class Schedule Calendar" />
+  <meta name="theme-color" content="#2196F3" />
   <title>Class Schedule Calendar</title>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       padding: 20px;
     }
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
+    .container { max-width: 900px; margin: 0 auto; }
 
     header {
       background: white;
-      padding: 20px;
       border-radius: 15px;
-      text-align: center;
+      padding: 20px;
       margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
     }
 
-    h1 { margin-bottom: 10px; }
+    h1 { color: #333; font-size: 28px; margin-bottom: 10px; }
 
     .calendar-container {
       background: white;
       border-radius: 15px;
       padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
     .calendar-header {
@@ -40,25 +42,34 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    button {
+    .calendar-header button,
+    .notification-btn {
       background: #2196F3;
       color: white;
       border: none;
-      padding: 10px;
+      padding: 10px 15px;
       border-radius: 8px;
       cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background 0.3s;
     }
 
-    .month-year {
-      font-size: 22px;
-      font-weight: bold;
+    .calendar-header button:hover,
+    .notification-btn:hover {
+      background: #1976D2;
     }
+
+    .month-year { font-size: 24px; font-weight: bold; color: #333; }
 
     .weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
       margin-bottom: 10px;
     }
 
@@ -66,240 +77,466 @@
       text-align: center;
       font-weight: bold;
       color: #2196F3;
+      padding: 10px 0;
+      font-size: 14px;
     }
 
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 10px;
+      min-height: 600px;
     }
 
     .day-box {
       background: #f9f9f9;
-      border: 2px solid #ddd;
+      border: 2px solid #e0e0e0;
       border-radius: 8px;
-      padding: 8px;
-      min-height: 110px;
-
+      padding: 10px;
+      min-height: 120px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
       min-width: 0;
       overflow: hidden;
     }
 
-    .day-box.today {
-      border: 3px solid #2196F3;
-      background: #e3f2fd;
-    }
+    .day-box:hover { background: #f0f7ff; border-color: #2196F3; }
+    .day-box.other-month { background: #fafafa; opacity: 0.5; cursor: default; }
 
-    .day-box.other-month {
-      opacity: 0.4;
+    .day-box.today {
+      background: #e3f2fd;
+      border-color: #2196F3;
+      border-width: 3px;
+      box-shadow: 0 0 0 2px rgba(33,150,243,0.12);
     }
 
     .day-number {
       font-weight: bold;
-      margin-bottom: 5px;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 16px;
     }
+
+    .day-box.other-month .day-number { color: #999; }
 
     .class-event {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 4px 6px;
+      border-radius: 4px;
       font-size: 11px;
       margin-bottom: 3px;
-      padding: 3px;
-      border-radius: 4px;
-      color: white;
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      font-weight: 500;
+      min-width: 0;
     }
 
-    .class1 { background: #667eea; }
-    .class5 { background: #f5576c; }
+    .class-event.class1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .class-event.class5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
 
-    .holiday {
-      background: #ffcc33;
-      color: black;
+    .class-event.holiday {
+      background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+      color: #333;
       font-weight: bold;
     }
 
+    .info-box {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #856404;
+      text-align: center;
+    }
+
+    .next-class {
+      background: #f0f7ff;
+      border-left: 4px solid #2196F3;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .next-class h3 { color: #2196F3; margin-bottom: 10px; }
+    .class-name { font-size: 18px; font-weight: bold; color: #333; }
+    .class-details { color: #666; font-size: 14px; margin-top: 5px; }
+
+    @media (max-width: 768px) {
+      .container { max-width: 100%; }
+      .calendar-grid { min-height: 800px; }
+      .day-box { min-height: 100px; padding: 8px; }
+      .day-number { font-size: 14px; }
+      .class-event { font-size: 10px; }
+      .weekday { font-size: 12px; }
+      .month-year { font-size: 20px; }
+    }
+
+    @media (max-width: 480px) {
+      .calendar-grid { min-height: 1000px; }
+      .day-box { min-height: 80px; }
+      h1 { font-size: 22px; }
+    }
   </style>
 </head>
 
 <body>
+  <div class="container">
+    <header>
+      <h1>📚 Class Schedule Calendar</h1>
+      <button class="notification-btn" onclick="requestNotifications()">
+        🔔 Enable Notifications
+      </button>
 
-<div class="container">
+      <div class="next-class" id="nextClass">
+        <h3>Next Class</h3>
+        <p style="color:#666;">Loading...</p>
+      </div>
+    </header>
 
-  <header>
-    <h1>📚 Class Schedule Calendar</h1>
-  </header>
-
-  <div class="calendar-container">
-
-    <div class="calendar-header">
-      <button onclick="previousMonth()">← Previous</button>
-      <div class="month-year" id="monthYear"></div>
-      <button onclick="nextMonth()">Next →</button>
+    <div class="info-box">
+      ℹ️ Click on any date to see class details. Ask your instructor if you are not sure in which class you are scheduled.
     </div>
 
-    <div class="weekdays">
-      <div class="weekday">Sun</div>
-      <div class="weekday">Mon</div>
-      <div class="weekday">Tue</div>
-      <div class="weekday">Wed</div>
-      <div class="weekday">Thu</div>
-      <div class="weekday">Fri</div>
-      <div class="weekday">Sat</div>
+    <div class="calendar-container">
+      <div class="calendar-header">
+        <button onclick="previousMonth()">← Previous</button>
+        <div style="text-align:center; flex:1;">
+          <div class="month-year" id="monthYear"></div>
+        </div>
+        <button onclick="nextMonth()">Next →</button>
+      </div>
+
+      <div class="weekdays">
+        <div class="weekday">Sun</div>
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+      </div>
+
+      <div class="calendar-grid" id="calendarGrid"></div>
     </div>
-
-    <div class="calendar-grid" id="calendarGrid"></div>
-
   </div>
-</div>
 
-<script>
+  <script>
+    const classTemplate = {
+      class1day: [
+        { name: 'Class 1', time: '08:00 - 10:00', type: 'class1' },
+        { name: 'Class 2', time: '10:00 - 12:00', type: 'class1' },
+        { name: 'Class 3', time: '12:00 - 14:00', type: 'class1' },
+        { name: 'Class 4', time: '14:00 - 16:00', type: 'class1' }
+      ],
+      class5day: [
+        { name: 'Class 5', time: '08:00 - 10:00', type: 'class5' },
+        { name: 'Class 6', time: '10:00 - 12:00', type: 'class5' },
+        { name: 'Class 7', time: '12:00 - 14:00', type: 'class5' },
+        { name: 'Class 8', time: '14:00 - 16:00', type: 'class5' }
+      ],
+      saturday: [
+        { name: 'Saturday Classes', time: '09:00 - 13:00', type: 'class5' }
+      ]
+    };
 
-const today = new Date();
-let currentMonth = today.getMonth();
-let currentYear = today.getFullYear();
+    const publicHolidays = {
+      '2026-01-01': "New Year's Day",
+      '2026-03-21': "Human Rights Day",
+      '2026-04-03': "Good Friday",
+      '2026-04-04': "NCC Closed",
+      '2026-04-06': "Family Day",
+      '2026-04-27': "Freedom Day",
+      '2026-05-01': "Workers' Day",
+      '2026-05-30': "NCC Graduation Day",
+      '2026-06-16': "Youth Day",
+      '2026-07-04': "NCC Graduation Day",
+      '2026-08-09': "National Women's Day",
+      '2026-08-10': "Women's Day (Observed)",
+      '2026-09-24': "Heritage Day",
 
-/* CLASS STRUCTURE */
-const classTemplate = {
-  class1day: ["Class 1","Class 2","Class 3","Class 4"],
-  class5day: ["Class 5","Class 6","Class 7","Class 8"],
-  saturday: ["Saturday Classes"]
-};
+      '2026-12-16': "Day of Reconciliation / NCC Closed Annual Holiday",
+      '2026-12-17': "NCC Closed Annual Holiday",
+      '2026-12-18': "NCC Closed Annual Holiday",
+      '2026-12-19': "NCC Closed Annual Holiday",
+      '2026-12-20': "NCC Closed Annual Holiday",
+      '2026-12-21': "NCC Closed Annual Holiday",
+      '2026-12-22': "NCC Closed Annual Holiday",
+      '2026-12-23': "NCC Closed Annual Holiday",
+      '2026-12-24': "NCC Closed Annual Holiday",
+      '2026-12-25': "Christmas Day",
+      '2026-12-26': "Day of Goodwill",
+      '2026-12-27': "NCC Closed Annual Holiday",
+      '2026-12-28': "NCC Closed Annual Holiday",
+      '2026-12-29': "NCC Closed Annual Holiday",
+      '2026-12-30': "NCC Closed Annual Holiday",
+      '2026-12-31': "NCC Closed Annual Holiday",
 
-/* HOLIDAYS */
-const publicHolidays = {
-  '2026-03-21': "Human Rights Day",
-  '2026-04-27': "Freedom Day",
-  '2026-12-25': "Christmas Day"
-};
+      '2027-01-01': "New Year's Day",
+      '2027-01-02': "NCC Closed Annual Holiday"
+    };
 
-/* ROTATION RESET */
-const rotationRules = [
-  { start: '2026-02-16', type: 'class5' },
-  { start: '2027-01-04', type: 'class1' }
-];
+    const noClassDates = new Set(Object.keys(publicHolidays));
 
-function getRule(dateStr){
-  let active = rotationRules[0];
-  rotationRules.forEach(r=>{
-    if(dateStr >= r.start) active = r;
-  });
-  return active;
-}
-
-function weeksBetween(start, current){
-  const s = new Date(start);
-  const c = new Date(current);
-  return Math.floor((c - s) / (7*24*60*60*1000));
-}
-
-function getClasses(dateStr){
-
-  if(publicHolidays[dateStr]) return [];
-
-  const d = new Date(dateStr);
-  const day = d.getDay();
-
-  if(day===0) return [];
-  if(day===6) return classTemplate.saturday;
-
-  const rule = getRule(dateStr);
-  const evenWeek = weeksBetween(rule.start, dateStr) % 2 === 0;
-
-  let mwf = rule.type;
-  if(!evenWeek) mwf = (mwf==='class1') ? 'class5':'class1';
-
-  const tt = (mwf==='class1') ? 'class5':'class1';
-
-  const isMWF = [1,3,5].includes(day);
-
-  return isMWF ? classTemplate[mwf+'day'] : classTemplate[tt+'day'];
-}
-
-/* CALENDAR */
-function renderCalendar(){
-
-  const grid = document.getElementById("calendarGrid");
-  const title = document.getElementById("monthYear");
-
-  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-  title.textContent = months[currentMonth] + " " + currentYear;
-
-  grid.innerHTML = "";
-
-  const firstDay = new Date(currentYear,currentMonth,1).getDay();
-  const daysInMonth = new Date(currentYear,currentMonth+1,0).getDate();
-
-  for(let i=0;i<firstDay;i++){
-    grid.appendChild(createBox("",true));
-  }
-
-  for(let d=1; d<=daysInMonth; d++){
-
-    const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const box = createBox(d,false,dateStr);
-
-    grid.appendChild(box);
-  }
-
-}
-
-/* DAY BOX */
-function createBox(day,other,dateStr=null){
-
-  const div = document.createElement("div");
-  div.className="day-box";
-
-  if(other) div.classList.add("other-month");
-
-  if(dateStr){
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-    if(dateStr===todayStr) div.classList.add("today");
-  }
-
-  const num = document.createElement("div");
-  num.className="day-number";
-  num.textContent=day;
-  div.appendChild(num);
-
-  if(dateStr){
-
-    const classes = getClasses(dateStr);
-
-    classes.forEach(c=>{
-      const el=document.createElement("div");
-      el.className="class-event "+(c.includes("1")?"class1":"class5");
-      el.textContent=c;
-      div.appendChild(el);
-    });
-
-    if(publicHolidays[dateStr]){
-      const el=document.createElement("div");
-      el.className="class-event holiday";
-      el.textContent="🎉 "+publicHolidays[dateStr];
-      div.appendChild(el);
+    function getMonday(d) {
+      const date = new Date(d);
+      const day = date.getDay();
+      const diff = (day === 0 ? -6 : 1) - day;
+      date.setDate(date.getDate() + diff);
+      date.setHours(0, 0, 0, 0);
+      return date;
     }
-  }
 
-  return div;
-}
+    function weeksBetween(anchorStr, dateStr) {
+      const anchorDate = getMonday(new Date(anchorStr + 'T00:00:00'));
+      const targetDate = getMonday(new Date(dateStr + 'T00:00:00'));
+      const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+      return Math.round((targetDate - anchorDate) / msPerWeek);
+    }
 
-function previousMonth(){
-  currentMonth--;
-  if(currentMonth<0){ currentMonth=11; currentYear--; }
-  renderCalendar();
-}
+    const rotationRules = [
+      { start: '2026-02-16', week0MWF: 'class5' },
+      { start: '2027-01-04', week0MWF: 'class1' }
+    ];
 
-function nextMonth(){
-  currentMonth++;
-  if(currentMonth>11){ currentMonth=0; currentYear++; }
-  renderCalendar();
-}
+    function getActiveRotationRule(dateStr) {
+      let active = rotationRules[0];
+      for (const rule of rotationRules) {
+        if (dateStr >= rule.start) active = rule;
+      }
+      return active;
+    }
 
-renderCalendar();
+    function getClassesForDate(dateStr) {
+      if (noClassDates.has(dateStr)) return [];
 
-</script>
+      const date = new Date(dateStr + 'T00:00:00');
+      const day = date.getDay();
 
+      if (day === 0) return [];
+      if (day === 6) return classTemplate.saturday;
+
+      const isMonWedFri = (day === 1 || day === 3 || day === 5);
+      const rule = getActiveRotationRule(dateStr);
+      const weekOffset = weeksBetween(rule.start, dateStr);
+      const isEvenWeek = (weekOffset % 2 === 0);
+
+      let mwfClass = rule.week0MWF;
+      if (!isEvenWeek) mwfClass = (mwfClass === 'class1') ? 'class5' : 'class1';
+
+      const tueThuClass = (mwfClass === 'class1') ? 'class5' : 'class1';
+
+      if (isMonWedFri) {
+        return (mwfClass === 'class1') ? classTemplate.class1day : classTemplate.class5day;
+      } else {
+        return (tueThuClass === 'class1') ? classTemplate.class1day : classTemplate.class5day;
+      }
+    }
+
+    const now = new Date();
+    let currentMonth = now.getMonth();
+    let currentYear = now.getFullYear();
+
+    function renderCalendar() {
+      const calendarGrid = document.getElementById('calendarGrid');
+      const monthYearDisplay = document.getElementById('monthYear');
+
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      monthYearDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+      calendarGrid.innerHTML = '';
+
+      for (let i = firstDay - 1; i >= 0; i--) {
+        calendarGrid.appendChild(createDayBox(daysInPrevMonth - i, true));
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        calendarGrid.appendChild(createDayBox(day, false, dateStr));
+      }
+
+      const remainingCells = 42 - calendarGrid.children.length;
+      for (let day = 1; day <= remainingCells; day++) {
+        calendarGrid.appendChild(createDayBox(day, true));
+      }
+
+      updateNextClass();
+    }
+
+    function createDayBox(day, isOtherMonth, dateStr = null) {
+      const dayBox = document.createElement('div');
+      dayBox.className = 'day-box';
+
+      if (isOtherMonth) dayBox.classList.add('other-month');
+
+      if (!isOtherMonth && dateStr) {
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        if (dateStr === todayStr) dayBox.classList.add('today');
+      }
+
+      const dayNumber = document.createElement('div');
+      dayNumber.className = 'day-number';
+      dayNumber.textContent = day;
+      dayBox.appendChild(dayNumber);
+
+      if (dateStr) {
+        const classes = getClassesForDate(dateStr);
+        classes.forEach(cls => {
+          const classEvent = document.createElement('div');
+          classEvent.className = `class-event ${cls.type}`;
+          classEvent.textContent = cls.name;
+          classEvent.title = `${cls.name}\n${cls.time}`;
+          dayBox.appendChild(classEvent);
+        });
+
+        if (publicHolidays[dateStr]) {
+          const holidayTag = document.createElement('div');
+          holidayTag.className = 'class-event holiday';
+          holidayTag.textContent = '🎉 ' + publicHolidays[dateStr];
+          holidayTag.title = publicHolidays[dateStr];
+          dayBox.appendChild(holidayTag);
+        }
+      }
+
+      if (!isOtherMonth && dateStr) {
+        dayBox.onclick = () => showClassDetails(dateStr);
+        dayBox.style.cursor = 'pointer';
+      } else {
+        dayBox.style.cursor = 'default';
+      }
+
+      return dayBox;
+    }
+
+    function previousMonth() {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+
+    function showClassDetails(dateStr) {
+      const classes = getClassesForDate(dateStr);
+      const holidayName = publicHolidays[dateStr];
+
+      if ((!classes || classes.length === 0) && !holidayName) return;
+
+      const date = new Date(dateStr + 'T00:00:00');
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateDisplay = date.toLocaleDateString('en-US', options);
+
+      let details = `${dateDisplay}\n\n`;
+
+      if (holidayName) details += `🎉 ${holidayName}\n\n`;
+
+      if (classes && classes.length > 0) {
+        classes.forEach(cls => {
+          details += `${cls.name}\n⏰ ${cls.time}\n\n`;
+        });
+      } else if (holidayName) {
+        details += `No classes scheduled.\n\n`;
+      }
+
+      alert(details);
+    }
+
+    function updateNextClass() {
+      const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+      let nextClass = null;
+      let nextClassDate = null;
+
+      for (let i = 0; i <= 180; i++) {
+        const d = new Date(now);
+        d.setDate(now.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        const classes = getClassesForDate(dateStr);
+
+        for (const cls of classes) {
+          const [startTime] = cls.time.split(' - ');
+          const [startHour, startMin] = startTime.split(':').map(Number);
+          const classStartMinutes = startHour * 60 + startMin;
+
+          if (i === 0) {
+            if (classStartMinutes > currentTotalMinutes) {
+              nextClass = cls;
+              nextClassDate = dateStr;
+              break;
+            }
+          } else {
+            nextClass = cls;
+            nextClassDate = dateStr;
+            break;
+          }
+        }
+        if (nextClass) break;
+      }
+
+      const nextClassDiv = document.getElementById('nextClass');
+
+      if (nextClass) {
+        const date = new Date(nextClassDate + 'T00:00:00');
+        const dateDisplay = date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+        nextClassDiv.innerHTML = `
+          <h3>Next Class</h3>
+          <div class="class-name">${nextClass.name}</div>
+          <div class="class-details">📅 ${dateDisplay}</div>
+          <div class="class-details">⏰ ${nextClass.time}</div>
+        `;
+      } else {
+        nextClassDiv.innerHTML = `
+          <h3>Next Class</h3>
+          <p style="color:#666;">No upcoming classes scheduled</p>
+        `;
+      }
+    }
+
+    function requestNotifications() {
+      if (!('Notification' in window)) {
+        alert('Your browser does not support notifications');
+        return;
+      }
+
+      if (Notification.permission === 'granted') {
+        alert('✅ Notifications already enabled!');
+        return;
+      }
+
+      if (Notification.permission === 'denied') {
+        alert('⚠️ Notifications are blocked. Please enable them in your browser settings.');
+        return;
+      }
+
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          alert('✅ Notifications enabled! (Permission only. Full reminders need scheduler logic.)');
+        }
+      });
+    }
+
+    renderCalendar();
+  </script>
 </body>
 </html>
